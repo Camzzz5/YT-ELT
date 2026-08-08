@@ -2,7 +2,7 @@ import requests
 import json
 from dotenv import load_dotenv
 import os
-
+from datetime import date
 load_dotenv('./.env')
 
 API_KEY = os.getenv('API_KEY')
@@ -80,19 +80,22 @@ def extract_video_data(video_ids):
             data = response.json()
 
             for item in data.get('items', []):
+
+                print(item)
+
+
+                # break
                 video_id = item['id']
                 snippet = item['snippet']
                 contentDetails = item['contentDetails']
                 statistics = item['statistics']
 
-                print(item)
 
-                break
 
                 video_data = {
                     'video_id':video_id,
                     'title': snippet['title'],
-                    'publishedAt':contentDetails['publishedAt'],
+                    'publishedAt':snippet['publishedAt'],
                     'duration':contentDetails['duration'],
                     'viewCount':statistics.get('viewCount', None),
                     'likeCount':statistics.get('likeCount', None),
@@ -107,7 +110,10 @@ def extract_video_data(video_ids):
         raise e
 
 
-
+def save_to_json(extracted_data):
+    filepath = f'./data/YT_data_{date.today()}.json'
+    with open(filepath, 'w', encoding = 'utf-8') as json_outfile:
+        json.dump(extracted_data, json_outfile, indent = 4, ensure_ascii = False)
 
 
 if __name__ == '__main__':
@@ -115,5 +121,9 @@ if __name__ == '__main__':
     #print(playlist_id)
     video_ids = get_video_ids(playlist_id)
     #print(video_ids)
-    print(extract_video_data(video_ids))
+    video_data = extract_video_data(video_ids)
+    # print('&&&&&&&&&&&&&&&&')
+    # print(video_data)
+    # print('&&&&&&&&&&&&&&&&')
+    save_to_json(video_data)
 
